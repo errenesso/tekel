@@ -482,9 +482,21 @@ const TYPE_ICONS = {
 };
 
 function buildOSMQuery(lat, lon) {
-  const radius = 5000;
-  const parts = SHOP_TYPES.map(t => `node${t}(around:${radius},${lat},${lon});`).join('');
-  return `[out:json][timeout:15];(${parts});out body 30;`;
+  const r = 5000;
+  // Türkiye'de alkol satılan her türlü yer — geniş kapsam
+  return `[out:json][timeout:25];(
+    node["shop"="alcohol"](around:${r},${lat},${lon});
+    way["shop"="alcohol"](around:${r},${lat},${lon});
+    node["shop"="wine"](around:${r},${lat},${lon});
+    node["shop"="supermarket"](around:${r},${lat},${lon});
+    way["shop"="supermarket"](around:${r},${lat},${lon});
+    node["shop"="convenience"](around:${r},${lat},${lon});
+    node["shop"="department_store"](around:${r},${lat},${lon});
+    node["amenity"="bar"](around:${r},${lat},${lon});
+    node["amenity"="pub"](around:${r},${lat},${lon});
+    node["amenity"="nightclub"](around:${r},${lat},${lon});
+    node["amenity"="restaurant"]["alcohol"](around:${r},${lat},${lon});
+  );out center body 50;`;
 }
 
 async function fetchNearestShop(lat, lon) {
@@ -501,8 +513,11 @@ async function fetchNearestShop(lat, lon) {
 
     let nearest = null, minDist = Infinity;
     elements.forEach(el => {
-      if (!el.lat || !el.lon) return;
-      const d = distance(lat, lon, el.lat, el.lon);
+      const elLat = el.lat || (el.center && el.center.lat);
+      const elLon = el.lon || (el.center && el.center.lon);
+      if (!elLat || !elLon) return;
+      el.lat = elLat; el.lon = elLon;
+      const d = distance(lat, lon, elLat, elLon);
       if (d < minDist) { minDist = d; nearest = el; }
     });
 
