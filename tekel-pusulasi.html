@@ -5,316 +5,141 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Tekel">
+<meta name="apple-mobile-web-app-title" content="Nereye?">
 <meta name="theme-color" content="#0a0a0a">
-<title>Tekel Pusulası</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>Nereye?</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--surface:#141414;--border:rgba(255,255,255,0.08);
+  --accent:#e8c84a;--accent-dim:rgba(232,200,74,0.15);
+  --text:#f0ede6;--muted:rgba(240,237,230,0.45);
+  --red:#e05a3a;--green:#4caf82;--blue:#5ab4e8;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;-webkit-tap-highlight-color:transparent;user-select:none}
 
-  :root {
-    --bg: #0a0a0a;
-    --surface: #141414;
-    --border: rgba(255,255,255,0.08);
-    --accent: #e8c84a;
-    --accent-dim: rgba(232,200,74,0.15);
-    --text: #f0ede6;
-    --muted: rgba(240,237,230,0.45);
-    --red: #e05a3a;
-    --green: #4caf82;
-  }
+/* ── OVERLAY ── */
+#overlay{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:28px;z-index:100;padding:40px 28px;
+}
+#logo{font-family:'Syne',sans-serif;font-size:52px;font-weight:800;color:var(--accent);letter-spacing:-0.03em;line-height:1}
+#logo span{color:var(--text);opacity:0.3;font-size:28px}
+#tagline{font-size:12px;color:var(--muted);letter-spacing:0.12em;text-align:center;line-height:2}
+.mode-btn{
+  width:100%;max-width:320px;padding:18px 24px;border-radius:14px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-family:'DM Mono',monospace;
+  font-size:15px;cursor:pointer;display:flex;align-items:center;gap:14px;
+  transition:border-color 0.2s,background 0.2s;text-align:left;
+}
+.mode-btn:active{transform:scale(0.97)}
+.mode-btn.tekel{border-color:rgba(232,200,74,0.4)}
+.mode-btn.tekel:hover{background:rgba(232,200,74,0.07)}
+.mode-btn.bar{border-color:rgba(90,180,232,0.4)}
+.mode-btn.bar:hover{background:rgba(90,180,232,0.07)}
+.btn-icon{font-size:28px;line-height:1;flex-shrink:0}
+.btn-text{display:flex;flex-direction:column;gap:3px}
+.btn-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.05em}
+.btn-sub{font-size:10px;color:var(--muted);letter-spacing:0.08em}
+.mode-btn.tekel .btn-title{color:var(--accent)}
+.mode-btn.bar .btn-title{color:var(--blue)}
+#err{font-size:12px;color:var(--red);text-align:center;display:none;padding:0 10px;line-height:1.6}
 
-  html, body {
-    height: 100%;
-    overflow: hidden;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-  }
+/* ── APP ── */
+#app{
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  height:100dvh;
+  padding:max(env(safe-area-inset-top,20px),24px) 20px max(env(safe-area-inset-bottom,20px),24px);
+}
+#header{width:100%;display:flex;justify-content:space-between;align-items:center}
+#app-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase}
+#app-title.tekel{color:var(--accent)}
+#app-title.bar{color:var(--blue)}
+#status-pill{font-size:11px;letter-spacing:0.08em;padding:4px 10px;border-radius:20px;border:1px solid var(--border);color:var(--muted);transition:all 0.3s}
+#status-pill.active{border-color:var(--green);color:var(--green)}
+#status-pill.searching{border-color:var(--accent);color:var(--accent)}
 
-  #app {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    height: 100dvh;
-    padding: env(safe-area-inset-top, 20px) 20px env(safe-area-inset-bottom, 20px);
-    padding-top: max(env(safe-area-inset-top, 20px), 24px);
-    padding-bottom: max(env(safe-area-inset-bottom, 20px), 24px);
-  }
+/* ── COMPASS ── */
+#compass-section{display:flex;flex-direction:column;align-items:center;flex:1;justify-content:center}
+#compass-outer{position:relative;width:min(72vw,300px);height:min(72vw,300px)}
+#compass-bg{width:100%;height:100%;border-radius:50%;background:var(--surface);border:1px solid var(--border);position:absolute;top:0;left:0}
+#tick-svg{position:absolute;top:0;left:0;width:100%;height:100%}
+.card-letter{position:absolute;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;transform:translate(-50%,-50%)}
+.card-letter.N{top:10%;left:50%;color:var(--red)}
+.card-letter.S{top:90%;left:50%;color:var(--muted)}
+.card-letter.E{top:50%;left:90%;color:var(--muted)}
+.card-letter.W{top:50%;left:10%;color:var(--muted)}
+#needle-wrap{position:absolute;top:0;left:0;width:100%;height:100%;transition:transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94);transform-origin:center}
+#needle-svg{width:100%;height:100%}
+#center-dot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:var(--accent);z-index:10;box-shadow:0 0 0 4px var(--accent-dim)}
+#bearing-label{margin-top:18px;font-size:11px;letter-spacing:0.12em;color:var(--muted);text-align:center;min-height:16px}
 
-  /* ── Header ── */
-  #header {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  #app-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent);
-  }
-  #status-pill {
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    padding: 4px 10px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    transition: all 0.3s;
-  }
-  #status-pill.active { border-color: var(--green); color: var(--green); }
-  #status-pill.searching { border-color: var(--accent); color: var(--accent); }
+/* ── DISTANCE ── */
+#distance-block{text-align:center;margin-top:6px}
+#dist-number{font-family:'Syne',sans-serif;font-size:clamp(52px,18vw,80px);font-weight:800;line-height:1;color:var(--text);letter-spacing:-0.02em;transition:color 0.3s}
+#dist-number.close{color:var(--accent)}
+#dist-unit{font-size:14px;color:var(--muted);letter-spacing:0.1em;margin-top:4px}
 
-  /* ── Compass ── */
-  #compass-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-    flex: 1;
-    justify-content: center;
-  }
+/* ── SHOP CARD ── */
+#shop-card{
+  width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;min-height:64px;
+  position:relative;
+}
+#shop-icon{font-size:24px;flex-shrink:0;line-height:1}
+#shop-text{flex:1;overflow:hidden}
+#shop-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+#shop-type{font-size:11px;color:var(--muted);letter-spacing:0.08em;margin-top:2px}
+#open-maps{
+  flex-shrink:0;background:var(--accent-dim);border:1px solid rgba(232,200,74,0.3);
+  color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.05em;
+  padding:8px 14px;border-radius:10px;cursor:pointer;display:none;text-decoration:none;
+  white-space:nowrap;
+}
+#back-btn{
+  position:absolute;top:-48px;right:0;background:transparent;border:1px solid var(--border);
+  color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.05em;
+  padding:5px 12px;border-radius:8px;cursor:pointer;display:none;
+}
 
-  #compass-outer {
-    position: relative;
-    width: min(72vw, 300px);
-    height: min(72vw, 300px);
-  }
-
-  #compass-bg {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    position: absolute;
-    top: 0; left: 0;
-  }
-
-  /* Tick ring */
-  #tick-svg {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-  }
-
-  /* Cardinal letters */
-  .card-letter {
-    position: absolute;
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    transform: translate(-50%, -50%);
-  }
-  .card-letter.N { top: 10%; left: 50%; color: var(--red); }
-  .card-letter.S { top: 90%; left: 50%; color: var(--muted); }
-  .card-letter.E { top: 50%; left: 90%; color: var(--muted); }
-  .card-letter.W { top: 50%; left: 10%; color: var(--muted); }
-
-  /* Needle */
-  #needle-wrap {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    transform-origin: center;
-  }
-  #needle-svg {
-    width: 100%; height: 100%;
-  }
-
-  /* Center dot */
-  #center {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    background: var(--accent);
-    z-index: 10;
-    box-shadow: 0 0 0 4px var(--accent-dim);
-  }
-
-  /* Bearing label below compass */
-  #bearing-label {
-    margin-top: 20px;
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    color: var(--muted);
-    text-align: center;
-    min-height: 16px;
-  }
-
-  /* ── Distance display ── */
-  #distance-block {
-    text-align: center;
-    margin-top: 8px;
-  }
-  #dist-number {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(52px, 18vw, 80px);
-    font-weight: 800;
-    line-height: 1;
-    color: var(--text);
-    letter-spacing: -0.02em;
-    transition: color 0.3s;
-  }
-  #dist-number.close { color: var(--accent); }
-  #dist-unit {
-    font-size: 14px;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    margin-top: 4px;
-  }
-
-  /* ── Shop info ── */
-  #shop-card {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 64px;
-  }
-  #shop-icon {
-    font-size: 24px;
-    flex-shrink: 0;
-    line-height: 1;
-  }
-  #shop-text { flex: 1; overflow: hidden; }
-  #shop-name {
-    font-size: 14px;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--text);
-  }
-  #shop-type {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    margin-top: 2px;
-  }
-  #open-maps {
-    flex-shrink: 0;
-    background: var(--accent-dim);
-    border: 1px solid rgba(232,200,74,0.3);
-    color: var(--accent);
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.05em;
-    padding: 6px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: none;
-    text-decoration: none;
-  }
-
-  /* ── Start screen overlay ── */
-  #start-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 32px;
-    z-index: 100;
-    padding: 40px 24px;
-  }
-  #start-logo {
-    font-family: 'Syne', sans-serif;
-    font-size: 48px;
-    font-weight: 800;
-    color: var(--accent);
-    letter-spacing: -0.02em;
-  }
-  #start-tagline {
-    font-size: 13px;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    text-align: center;
-    line-height: 1.8;
-  }
-  #start-btn {
-    background: var(--accent);
-    color: #0a0a0a;
-    border: none;
-    font-family: 'Syne', sans-serif;
-    font-size: 15px;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 16px 40px;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: transform 0.15s, opacity 0.15s;
-  }
-  #start-btn:active { transform: scale(0.96); opacity: 0.85; }
-
-  #install-hint {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.06em;
-    text-align: center;
-    line-height: 1.7;
-    max-width: 260px;
-    padding: 12px 16px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-  }
-
-  /* Error */
-  #error-msg {
-    font-size: 12px;
-    color: var(--red);
-    text-align: center;
-    display: none;
-    padding: 0 20px;
-  }
-
-  /* Scanning animation */
-  @keyframes pulse-ring {
-    0% { box-shadow: 0 0 0 0 rgba(232,200,74,0.3); }
-    70% { box-shadow: 0 0 0 20px rgba(232,200,74,0); }
-    100% { box-shadow: 0 0 0 0 rgba(232,200,74,0); }
-  }
-  #center.scanning { animation: pulse-ring 1.5s ease-out infinite; }
+@keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(232,200,74,0.3)}70%{box-shadow:0 0 0 18px rgba(232,200,74,0)}100%{box-shadow:0 0 0 0 rgba(232,200,74,0)}}
+#center-dot.scanning{animation:pulse-ring 1.4s ease-out infinite}
 </style>
 </head>
 <body>
 
-<div id="start-overlay">
-  <div id="start-logo">TEKEL</div>
-  <div id="start-tagline">
-    En yakın alkol satış noktasına<br>
-    gerçek zamanlı yönlendirme
+<!-- OVERLAY: mod seçimi -->
+<div id="overlay">
+  <div>
+    <div id="logo">NEREYE<span>?</span></div>
   </div>
-  <button id="start-btn" onclick="startApp()">KONUMU AÇ</button>
-  <div id="install-hint">
-    📱 Ana ekrana eklemek için:<br>
-    <strong>Safari →</strong> Paylaş → Ana Ekrana Ekle<br>
-    <strong>Chrome →</strong> ⋮ → Ana ekrana ekle
-  </div>
-  <div id="error-msg"></div>
+  <div id="tagline">EN YAKIN NOKTAYA<br>GERÇEK ZAMANLI PUSULA</div>
+
+  <button class="mode-btn tekel" onclick="startApp('tekel')">
+    <div class="btn-icon">🥃</div>
+    <div class="btn-text">
+      <div class="btn-title">TEKEL BAYİİ</div>
+      <div class="btn-sub">ALKOL SATIŞI YAPAN YERLER</div>
+    </div>
+  </button>
+
+  <button class="mode-btn bar" onclick="startApp('bar')">
+    <div class="btn-icon">🍻</div>
+    <div class="btn-text">
+      <div class="btn-title">BAR / PUB</div>
+      <div class="btn-sub">AÇIK İÇKİ MEKÂNLARI</div>
+    </div>
+  </button>
+
+  <div id="err"></div>
 </div>
 
-<div id="app">
+<!-- ANA UYGULAMA -->
+<div id="app" style="display:none">
   <div id="header">
-    <div id="app-title">TEKEL</div>
+    <div id="app-title" class="tekel">NEREYE?</div>
     <div id="status-pill">HAZIR</div>
   </div>
 
@@ -323,8 +148,6 @@
       <div id="compass-bg"></div>
       <svg id="tick-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <g id="tick-group"></g>
-        <!-- Gece gölge halkası -->
-        <circle cx="150" cy="150" r="118" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="20"/>
       </svg>
       <span class="card-letter N">K</span>
       <span class="card-letter S">G</span>
@@ -332,15 +155,13 @@
       <span class="card-letter W">B</span>
       <div id="needle-wrap">
         <svg id="needle-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-          <!-- Kuzey (yukarı) = hedef yönü, kırmızı -->
           <polygon points="150,28 143,150 157,150" fill="#e05a3a" opacity="0.95"/>
-          <!-- Güney, gri -->
-          <polygon points="150,272 143,150 157,150" fill="rgba(255,255,255,0.2)"/>
+          <polygon points="150,272 143,150 157,150" fill="rgba(255,255,255,0.18)"/>
         </svg>
       </div>
-      <div id="center"></div>
+      <div id="center-dot"></div>
     </div>
-    <div id="bearing-label">— ° ·· — m</div>
+    <div id="bearing-label">— ° · · —</div>
   </div>
 
   <div id="distance-block">
@@ -348,283 +169,225 @@
     <div id="dist-unit">metre</div>
   </div>
 
-  <div id="shop-card">
-    <div id="shop-icon">🍺</div>
-    <div id="shop-text">
-      <div id="shop-name">Aranıyor...</div>
-      <div id="shop-type">EN YAKIN ALKOL SATIŞ NOKTASI</div>
+  <div style="width:100%;position:relative">
+    <button id="back-btn" onclick="goBack()">← GERİ DÖN</button>
+    <div id="shop-card">
+      <div id="shop-icon">🔍</div>
+      <div id="shop-text">
+        <div id="shop-name">Aranıyor...</div>
+        <div id="shop-type">EN YAKIN NOKTA BULUNUYOR</div>
+      </div>
+      <a id="open-maps" target="_blank">HARİTA</a>
     </div>
-    <a id="open-maps" target="_blank">HARİTA</a>
   </div>
 </div>
 
 <script>
-let userLat = null, userLon = null;
-let targetLat = null, targetLon = null;
-let deviceHeading = 0;
-let targetBearing = 0;
-let watchId = null;
+let userLat=null,userLon=null,targetLat=null,targetLon=null;
+let deviceHeading=0,targetBearing=0,watchId=null,currentMode=null;
 
-/* ── Tick marks ── */
-(function drawTicks() {
-  const g = document.getElementById('tick-group');
-  const cx = 150, cy = 150, r = 128;
-  for (let i = 0; i < 72; i++) {
-    const angle = i * 5 * Math.PI / 180;
-    const isMajor = i % 18 === 0;
-    const isMid = i % 9 === 0;
-    const len = isMajor ? 14 : isMid ? 9 : 5;
-    const stroke = isMajor ? 'rgba(255,255,255,0.5)' : isMid ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)';
-    const sw = isMajor ? 1.5 : 0.8;
-    const x1 = cx + (r - len) * Math.sin(angle);
-    const y1 = cy - (r - len) * Math.cos(angle);
-    const x2 = cx + r * Math.sin(angle);
-    const y2 = cy - r * Math.cos(angle);
-    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-    line.setAttribute('x1', x1.toFixed(2)); line.setAttribute('y1', y1.toFixed(2));
-    line.setAttribute('x2', x2.toFixed(2)); line.setAttribute('y2', y2.toFixed(2));
-    line.setAttribute('stroke', stroke);
-    line.setAttribute('stroke-width', sw);
-    line.setAttribute('stroke-linecap', 'round');
-    g.appendChild(line);
+/* Tick marks */
+(function(){
+  const g=document.getElementById('tick-group');
+  for(let i=0;i<72;i++){
+    const a=i*5*Math.PI/180,cx=150,cy=150,r=128;
+    const isMaj=i%18===0,isMid=i%9===0;
+    const len=isMaj?14:isMid?9:5;
+    const stroke=isMaj?'rgba(255,255,255,0.5)':isMid?'rgba(255,255,255,0.25)':'rgba(255,255,255,0.1)';
+    const x1=cx+(r-len)*Math.sin(a),y1=cy-(r-len)*Math.cos(a);
+    const x2=cx+r*Math.sin(a),y2=cy-r*Math.cos(a);
+    const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+    l.setAttribute('x1',x1.toFixed(2));l.setAttribute('y1',y1.toFixed(2));
+    l.setAttribute('x2',x2.toFixed(2));l.setAttribute('y2',y2.toFixed(2));
+    l.setAttribute('stroke',stroke);l.setAttribute('stroke-width',isMaj?1.5:0.8);
+    l.setAttribute('stroke-linecap','round');
+    g.appendChild(l);
   }
 })();
 
-/* ── Math ── */
-function toRad(d) { return d * Math.PI / 180; }
-
-function bearing(lat1, lon1, lat2, lon2) {
-  const dLon = toRad(lon2 - lon1);
-  const y = Math.sin(dLon) * Math.cos(toRad(lat2));
-  const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
-  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+function toRad(d){return d*Math.PI/180}
+function calcBearing(la1,lo1,la2,lo2){
+  const dL=toRad(lo2-lo1);
+  const y=Math.sin(dL)*Math.cos(toRad(la2));
+  const x=Math.cos(toRad(la1))*Math.sin(toRad(la2))-Math.sin(toRad(la1))*Math.cos(toRad(la2))*Math.cos(dL);
+  return(Math.atan2(y,x)*180/Math.PI+360)%360;
+}
+function calcDist(la1,lo1,la2,lo2){
+  const R=6371000,dLa=toRad(la2-la1),dLo=toRad(lo2-lo1);
+  const a=Math.sin(dLa/2)**2+Math.cos(toRad(la1))*Math.cos(toRad(la2))*Math.sin(dLo/2)**2;
+  return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
 }
 
-function distance(lat1, lon1, lat2, lon2) {
-  const R = 6371000;
-  const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
-  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
-  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+const needleWrap=document.getElementById('needle-wrap');
+const distNum=document.getElementById('dist-number');
+const distUnit=document.getElementById('dist-unit');
+const shopNameEl=document.getElementById('shop-name');
+const shopTypeEl=document.getElementById('shop-type');
+const shopIconEl=document.getElementById('shop-icon');
+const bearingLabel=document.getElementById('bearing-label');
+const statusPill=document.getElementById('status-pill');
+const centerDot=document.getElementById('center-dot');
+const openMaps=document.getElementById('open-maps');
+const backBtn=document.getElementById('back-btn');
+const appTitleEl=document.getElementById('app-title');
+
+function setStatus(t,cls){
+  statusPill.textContent=t;
+  statusPill.className=cls?`searching ${cls}`:'';
+  statusPill.id='status-pill';
+  if(cls)statusPill.classList.add(cls);
 }
 
-/* ── UI ── */
-const needleWrap = document.getElementById('needle-wrap');
-const distNum = document.getElementById('dist-number');
-const distUnit = document.getElementById('dist-unit');
-const shopName = document.getElementById('shop-name');
-const shopType = document.getElementById('shop-type');
-const shopIcon = document.getElementById('shop-icon');
-const bearingLabel = document.getElementById('bearing-label');
-const statusPill = document.getElementById('status-pill');
-const centerDot = document.getElementById('center');
-const openMaps = document.getElementById('open-maps');
-
-function setStatus(text, cls) {
-  statusPill.textContent = text;
-  statusPill.className = 'status-pill ' + (cls||'');
-  statusPill.id = 'status-pill';
-  if (cls) statusPill.classList.add(cls);
+function updateNeedle(){
+  needleWrap.style.transform=`rotate(${targetBearing-deviceHeading}deg)`;
 }
 
-function updateNeedle() {
-  const visualAngle = targetBearing - deviceHeading;
-  needleWrap.style.transform = `rotate(${visualAngle}deg)`;
-}
-
-function updateUI() {
-  if (userLat === null || targetLat === null) return;
-  const d = distance(userLat, userLon, targetLat, targetLon);
-  targetBearing = bearing(userLat, userLon, targetLat, targetLon);
+function updateUI(){
+  if(userLat===null||targetLat===null)return;
+  const d=calcDist(userLat,userLon,targetLat,targetLon);
+  targetBearing=calcBearing(userLat,userLon,targetLat,targetLon);
   updateNeedle();
-
-  if (d >= 1000) {
-    distNum.textContent = (d / 1000).toFixed(1);
-    distUnit.textContent = 'km';
-  } else {
-    distNum.textContent = d;
-    distUnit.textContent = 'metre';
-  }
-  distNum.className = d < 150 ? 'close' : '';
-
-  const dirs = ['K','KD','D','GD','G','GB','B','KB'];
-  const dir = dirs[Math.round(targetBearing / 45) % 8];
-  bearingLabel.textContent = `${Math.round(targetBearing)}° ${dir}  ·  ${d >= 1000 ? (d/1000).toFixed(1) + ' km' : d + ' m'}`;
+  if(d>=1000){distNum.textContent=(d/1000).toFixed(1);distUnit.textContent='km';}
+  else{distNum.textContent=d;distUnit.textContent='metre';}
+  distNum.className=d<150?'close':'';
+  const dirs=['K','KD','D','GD','G','GB','B','KB'];
+  const dir=dirs[Math.round(targetBearing/45)%8];
+  bearingLabel.textContent=`${Math.round(targetBearing)}° ${dir}  ·  ${d>=1000?(d/1000).toFixed(1)+' km':d+' m'}`;
 }
 
-/* ── OSM Query ── */
-const SHOP_TYPES = [
-  // Türkiye'de yaygın alkol satış noktaları
-  '["shop"="alcohol"]',
-  '["shop"="supermarket"]["name"~"Migros|CarrefourSA|Carrefour|Metro|BİM|A101|Şok|Hakmar|Macro|Kiler|Gratis",i]',
-  '["shop"="convenience"]["name"~"Migros|Groseri",i]',
-  '["amenity"="bar"]',
-  '["amenity"="pub"]',
-  '["shop"="wine"]',
-];
-
-const TYPE_LABELS = {
-  alcohol: 'TEKEL BAYİİ',
-  supermarket: 'SÜPERMARKET',
-  convenience: 'MARKET',
-  bar: 'BAR',
-  pub: 'PUB',
-  wine: 'ŞARAP & İÇKİ',
-};
-
-const TYPE_ICONS = {
-  alcohol: '🥃',
-  supermarket: '🛒',
-  convenience: '🏪',
-  bar: '🍻',
-  pub: '🍺',
-  wine: '🍷',
-  default: '🍺',
-};
-
-function buildOSMQuery(lat, lon) {
-  const r = 5000;
-  // Türkiye'de alkol satılan her türlü yer — geniş kapsam
+/* OSM sorguları */
+function buildQuery(lat,lon,mode){
+  const r=5000;
+  if(mode==='bar'){
+    return `[out:json][timeout:20];(
+      node["amenity"="bar"](around:${r},${lat},${lon});
+      node["amenity"="pub"](around:${r},${lat},${lon});
+      node["amenity"="nightclub"](around:${r},${lat},${lon});
+      node["amenity"="biergarten"](around:${r},${lat},${lon});
+    );out center body 30;`;
+  }
+  /* Tekel modu — sadece alkol satan yerler. BİM, A101, ŞOK dahil değil */
   return `[out:json][timeout:25];(
     node["shop"="alcohol"](around:${r},${lat},${lon});
     way["shop"="alcohol"](around:${r},${lat},${lon});
     node["shop"="wine"](around:${r},${lat},${lon});
-    node["shop"="supermarket"](around:${r},${lat},${lon});
-    way["shop"="supermarket"](around:${r},${lat},${lon});
-    node["shop"="convenience"](around:${r},${lat},${lon});
-    node["shop"="department_store"](around:${r},${lat},${lon});
-    node["amenity"="bar"](around:${r},${lat},${lon});
-    node["amenity"="pub"](around:${r},${lat},${lon});
-    node["amenity"="nightclub"](around:${r},${lat},${lon});
-    node["amenity"="restaurant"]["alcohol"](around:${r},${lat},${lon});
-  );out center body 50;`;
+    node["shop"="supermarket"]["name"~"Migros|CarrefourSA|Carrefour|Metro|Hakmar|Macro|Kiler|Groseri|Real|Özdilek|Watsons",i](around:${r},${lat},${lon});
+    way["shop"="supermarket"]["name"~"Migros|CarrefourSA|Carrefour|Metro|Hakmar|Macro|Kiler|Groseri|Real|Özdilek",i](around:${r},${lat},${lon});
+    node["shop"="department_store"]["name"~"Migros|CarrefourSA|Metro|Hakmar",i](around:${r},${lat},${lon});
+  );out center body 40;`;
 }
 
-async function fetchNearestShop(lat, lon) {
+const TYPE_LABELS={alcohol:'TEKEL BAYİİ',wine:'ŞARAP & İÇKİ',supermarket:'SÜPERMARKET',department_store:'BÜYÜK MARKET',bar:'BAR',pub:'PUB',nightclub:'GECE KULÜBÜ',biergarten:'BIRA BAHÇESİ'};
+const TYPE_ICONS={alcohol:'🥃',wine:'🍷',supermarket:'🛒',bar:'🍻',pub:'🍺',nightclub:'🎉',biergarten:'🍺',default:'🥃'};
+
+async function fetchNearest(lat,lon){
   centerDot.classList.add('scanning');
-  setStatus('ARANIYOR', 'searching');
-
-  const query = buildOSMQuery(lat, lon);
-  const url = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query);
-
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    const elements = data.elements || [];
-
-    let nearest = null, minDist = Infinity;
-    elements.forEach(el => {
-      const elLat = el.lat || (el.center && el.center.lat);
-      const elLon = el.lon || (el.center && el.center.lon);
-      if (!elLat || !elLon) return;
-      el.lat = elLat; el.lon = elLon;
-      const d = distance(lat, lon, elLat, elLon);
-      if (d < minDist) { minDist = d; nearest = el; }
+  setStatus('ARANIYOR','searching');
+  const url='https://overpass-api.de/api/interpreter?data='+encodeURIComponent(buildQuery(lat,lon,currentMode));
+  try{
+    const res=await fetch(url);
+    const data=await res.json();
+    const els=data.elements||[];
+    let nearest=null,minD=Infinity;
+    els.forEach(el=>{
+      const la=el.lat||(el.center&&el.center.lat);
+      const lo=el.lon||(el.center&&el.center.lon);
+      if(!la||!lo)return;
+      el.lat=la;el.lon=lo;
+      const d=calcDist(lat,lon,la,lo);
+      if(d<minD){minD=d;nearest=el;}
     });
-
     centerDot.classList.remove('scanning');
-
-    if (nearest) {
-      applyShop(nearest);
-    } else {
-      shopName.textContent = 'Yakında kayıtlı yer yok';
-      shopType.textContent = 'KAPSAM DIŞINDAKİ BÖLGE';
-      setStatus('SINIRLI VERİ', '');
+    if(nearest){applyShop(nearest);}
+    else{
+      shopNameEl.textContent='Yakında kayıtlı yer yok';
+      shopTypeEl.textContent='KAPSAM DIŞINDAKİ BÖLGE';
+      setStatus('SINIRLI VERİ','');
     }
-  } catch (e) {
+  }catch(e){
     centerDot.classList.remove('scanning');
-    shopName.textContent = 'Bağlantı hatası';
-    shopType.textContent = 'İNTERNET BAĞLANTISINI KONTROL ET';
-    setStatus('HATA', '');
+    shopNameEl.textContent='Bağlantı hatası';
+    shopTypeEl.textContent='İNTERNET BAĞLANTISINI KONTROL ET';
+    setStatus('HATA','');
   }
 }
 
-function applyShop(el) {
-  targetLat = el.lat;
-  targetLon = el.lon;
-
-  const tags = el.tags || {};
-  const name = tags.name || tags['name:tr'] || 'İsimsiz Nokta';
-  const shopT = tags.shop || tags.amenity || 'alcohol';
-
-  shopName.textContent = name;
-  shopType.textContent = TYPE_LABELS[shopT] || 'ALKOL SATIŞ NOKTASI';
-  shopIcon.textContent = TYPE_ICONS[shopT] || TYPE_ICONS.default;
-
-  openMaps.style.display = 'block';
-  openMaps.href = `https://maps.google.com/?q=${targetLat},${targetLon}`;
-
-  setStatus('AKTİF', 'active');
+function applyShop(el){
+  targetLat=el.lat;targetLon=el.lon;
+  const tags=el.tags||{};
+  const name=tags.name||tags['name:tr']||'İsimsiz Nokta';
+  const t=tags.shop||tags.amenity||'alcohol';
+  shopNameEl.textContent=name;
+  shopTypeEl.textContent=TYPE_LABELS[t]||'ALKOL SATIŞ NOKTASI';
+  shopIconEl.textContent=TYPE_ICONS[t]||TYPE_ICONS.default;
+  openMaps.style.display='block';
+  /* Google Maps yol tarifi — koordinat bazlı */
+  openMaps.href=`https://www.google.com/maps/dir/?api=1&destination=${targetLat},${targetLon}&travelmode=walking`;
+  statusPill.textContent='AKTİF';
+  statusPill.className='';
+  statusPill.id='status-pill';
+  statusPill.classList.add('active');
   updateUI();
 }
 
-/* ── Orientation ── */
-function listenOrientation() {
-  function handler(e) {
-    const h = (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null)
-      ? e.webkitCompassHeading
-      : (e.absolute && e.alpha !== null ? (360 - e.alpha) : null);
-    if (h !== null) {
-      deviceHeading = h;
-      updateNeedle();
-    }
+/* Yön sensörü */
+function listenOrientation(){
+  function handler(e){
+    const h=e.webkitCompassHeading!=null?e.webkitCompassHeading:(e.absolute&&e.alpha!=null?(360-e.alpha):null);
+    if(h!==null){deviceHeading=h;updateNeedle();}
   }
-  window.addEventListener('deviceorientationabsolute', handler, true);
-  window.addEventListener('deviceorientation', handler, true);
+  window.addEventListener('deviceorientationabsolute',handler,true);
+  window.addEventListener('deviceorientation',handler,true);
+}
+function requestOrientation(){
+  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission().then(s=>{if(s==='granted')listenOrientation();}).catch(()=>listenOrientation());
+  }else{listenOrientation();}
 }
 
-function requestOrientation() {
-  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-    DeviceOrientationEvent.requestPermission().then(s => {
-      if (s === 'granted') listenOrientation();
-    }).catch(() => listenOrientation());
-  } else {
-    listenOrientation();
-  }
+function goBack(){
+  if(watchId)navigator.geolocation.clearWatch(watchId);
+  userLat=null;userLon=null;targetLat=null;targetLon=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('overlay').style.display='flex';
+  openMaps.style.display='none';
+  backBtn.style.display='none';
+  distNum.textContent='—';
+  bearingLabel.textContent='— ° · · —';
 }
 
-/* ── Main ── */
-function startApp() {
-  document.getElementById('start-overlay').style.display = 'none';
+function startApp(mode){
+  currentMode=mode;
+  document.getElementById('overlay').style.display='none';
+  document.getElementById('app').style.display='flex';
+  appTitleEl.className=mode;
+  backBtn.style.display='block';
 
-  if (!navigator.geolocation) {
-    alert('Tarayıcınız konum desteklemiyor.');
-    return;
-  }
+  if(!navigator.geolocation){alert('Tarayıcınız konum desteklemiyor.');return;}
+  setStatus('KONUM','searching');
 
-  setStatus('KONUM', 'searching');
-
-  navigator.geolocation.getCurrentPosition(pos => {
-    userLat = pos.coords.latitude;
-    userLon = pos.coords.longitude;
-    fetchNearestShop(userLat, userLon);
+  navigator.geolocation.getCurrentPosition(pos=>{
+    userLat=pos.coords.latitude;userLon=pos.coords.longitude;
+    fetchNearest(userLat,userLon);
     requestOrientation();
-
-    // Sürekli güncelleme
-    watchId = navigator.geolocation.watchPosition(p => {
-      userLat = p.coords.latitude;
-      userLon = p.coords.longitude;
+    watchId=navigator.geolocation.watchPosition(p=>{
+      userLat=p.coords.latitude;userLon=p.coords.longitude;
       updateUI();
-    }, null, { enableHighAccuracy: true, maximumAge: 4000, timeout: 10000 });
-
-  }, err => {
-    const errEl = document.getElementById('error-msg');
-    const msgs = { 1:'Konum izni reddedildi. Lütfen tarayıcı ayarlarından konuma izin ver.', 2:'Konum alınamadı.', 3:'Konum isteği zaman aşımına uğradı.' };
-    errEl.textContent = msgs[err.code] || 'Konum hatası.';
-    errEl.style.display = 'block';
-    document.getElementById('start-overlay').style.display = 'flex';
-  }, { enableHighAccuracy: true, timeout: 15000 });
+    },null,{enableHighAccuracy:true,maximumAge:4000,timeout:10000});
+  },err=>{
+    const msgs={1:'Konum izni reddedildi.',2:'Konum alınamadı.',3:'Zaman aşımı.'};
+    const errEl=document.getElementById('err');
+    errEl.textContent=msgs[err.code]||'Konum hatası.';
+    errEl.style.display='block';
+    goBack();
+  },{enableHighAccuracy:true,timeout:15000});
 }
 
-/* ── PWA Service Worker (inline) ── */
-if ('serviceWorker' in navigator) {
-  const swCode = `
-    const CACHE = 'tekel-v1';
-    self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/tekel-pusulasi.html']))));
-    self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
-  `;
-  const blob = new Blob([swCode], { type: 'application/javascript' });
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(() => {});
+/* SW */
+if('serviceWorker' in navigator){
+  const sw=`const C='nereye-v2';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['/tekel-pusulasi.html']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+  const b=new Blob([sw],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(b)).catch(()=>{});
 }
 </script>
 </body>
